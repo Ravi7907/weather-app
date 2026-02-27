@@ -18,8 +18,9 @@
 The app fetches real-time weather data using the **OpenWeatherMap API** and displays it in a beautiful, fully responsive interface with advanced features like hourly charts, 7-day forecasts, dynamic themes, and GPS-based location detection.
 
 ---
-<img width="442" height="410" alt="image" src="https://github.com/user-attachments/assets/2d384658-378d-4b2b-9b9b-464715dcaaf2" />
 <img width="423" height="911" alt="image" src="https://github.com/user-attachments/assets/d920327e-eecc-46af-a1d8-b4264c032de0" />
+<img width="442" height="410" alt="image" src="https://github.com/user-attachments/assets/2d384658-378d-4b2b-9b9b-464715dcaaf2" />
+
 
 
 
