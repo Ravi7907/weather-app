@@ -21,7 +21,7 @@ The app fetches real-time weather data using the **OpenWeatherMap API** and disp
 
 ## 🖥️ Live Demo
 
-🌐 **[https://weather-app-ravi7907.vercel.app](https://weather-app-ravi7907.vercel.app)**
+🌐 **https://weather-app-blush-phi-91.vercel.app/**
 
 ---
 
