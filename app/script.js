@@ -631,5 +631,75 @@ window.addEventListener('resize', () => {
   canvas.height = window.innerHeight;
 });
 
-// Load default city on start
-window.addEventListener('load', () => quickLoad('Mumbai'));
+document.getElementById('welcomeMsg').classList.add('hidden');
+
+// ── Auto Detect Location on Load ─────────
+window.addEventListener('load', () => {
+  detectLocation();
+});
+
+function detectLocation() {
+  if (!navigator.geolocation) {
+    // Browser doesn't support geolocation → fallback
+    showWelcome();
+    return;
+  }
+
+  // Show loader while detecting
+  document.getElementById('loader').classList.remove('hidden');
+  document.getElementById('mainContent').classList.add('hidden');
+  document.getElementById('errorBox').classList.add('hidden');
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+      try {
+        // Get city name from coordinates
+        const res = await fetch(
+          `/api/weather-by-coords?lat=${latitude}&lon=${longitude}`
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        // Set city input and load weather
+        document.getElementById('cityInput').value = data.name;
+        currentWeatherData = data;
+        forecastData = null;
+
+        // Now fetch forecast too
+        const fRes = await fetch(
+          `/api/forecast?city=${encodeURIComponent(data.name)}`
+        );
+        const fData = await fRes.json();
+
+        document.getElementById('loader').classList.add('hidden');
+        renderWeather(data, fData.list);
+
+      } catch (err) {
+        document.getElementById('loader').classList.add('hidden');
+        showWelcome();
+      }
+    },
+    (error) => {
+      // User denied location or error
+      document.getElementById('loader').classList.add('hidden');
+      showWelcome();
+    },
+    {
+      timeout: 8000,
+      maximumAge: 300000 // Cache location for 5 minutes
+    }
+  );
+}
+
+function showWelcome() {
+  // Show empty search if location fails
+  document.getElementById('loader').classList.add('hidden');
+}
+
+// Handle canvas resize
+window.addEventListener('resize', () => {
+  const canvas = document.getElementById('particleCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});

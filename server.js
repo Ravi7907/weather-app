@@ -36,4 +36,23 @@ app.get('/api/forecast', async (req, res) => {
   }
 });
 
+// ─── Weather by Coordinates (for auto-detect) ──────────────
+app.get('/api/weather-by-coords', async (req, res) => {
+  const { lat, lon } = req.query;
+  if (!lat || !lon) return res.status(400).json({ error: 'Coordinates required' });
+  try {
+    const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
+      params: {
+        lat,
+        lon,
+        appid: process.env.WEATHER_API_KEY,
+        units: 'metric'
+      }
+    });
+    res.json(response.data);
+  } catch {
+    res.status(404).json({ error: 'Could not detect location weather.' });
+  }
+});
+
 app.listen(PORT, () => console.log(`✅ SKYCAST running at http://localhost:${PORT}`));
