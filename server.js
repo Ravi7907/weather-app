@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, 'app')));
 
-// ─── Current Weather ───────────────────────────────────────
+// ─── Current Weather by City ───────────────────────────────
 app.get('/api/weather', async (req, res) => {
   const { city } = req.query;
   if (!city) return res.status(400).json({ error: 'City is required' });
@@ -36,7 +36,7 @@ app.get('/api/forecast', async (req, res) => {
   }
 });
 
-// ─── Weather by Coordinates (for auto-detect) ──────────────
+// ─── Weather by GPS Coordinates (Auto-detect location) ─────
 app.get('/api/weather-by-coords', async (req, res) => {
   const { lat, lon } = req.query;
   if (!lat || !lon) return res.status(400).json({ error: 'Coordinates required' });
@@ -51,7 +51,7 @@ app.get('/api/weather-by-coords', async (req, res) => {
     });
     res.json(response.data);
   } catch {
-    res.status(404).json({ error: 'Could not detect location weather.' });
+    res.status(404).json({ error: 'Could not get weather for your location.' });
   }
 });
 
