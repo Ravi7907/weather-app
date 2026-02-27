@@ -1,174 +1,248 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="auto" data-time="day">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKYCAST — Weather Intelligence</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 
-  <!-- Animated background particles -->
-  <div class="bg-layer">
-    <div class="particle p1"></div>
-    <div class="particle p2"></div>
-    <div class="particle p3"></div>
-    <div class="particle p4"></div>
-    <div class="particle p5"></div>
+<canvas id="particleCanvas"></canvas>
+<div class="sky-layer" id="skyLayer"></div>
+
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">◈</div>
+      <div>
+        <div class="logo">SKY<span>CAST</span></div>
+        <div class="logo-sub">Weather Intelligence</div>
+      </div>
+    </div>
+    <div class="topbar-controls">
+      <button class="ctrl-btn" id="hourFormatBtn" onclick="toggleHourFormat()" title="Toggle 12/24h">24H</button>
+      <div class="theme-selector">
+        <button class="ctrl-btn theme-trigger" onclick="toggleThemeMenu()">🎨 THEME</button>
+        <div class="theme-menu hidden" id="themeMenu">
+          <div class="tm-title">SELECT THEME</div>
+          <button class="tm-opt" onclick="setTheme('auto')"><span class="td auto-d"></span>Auto (Sun-based)</button>
+          <button class="tm-opt" onclick="setTheme('midnight')"><span class="td midnight-d"></span>Midnight</button>
+          <button class="tm-opt" onclick="setTheme('arctic')"><span class="td arctic-d"></span>Arctic White</button>
+          <button class="tm-opt" onclick="setTheme('desert')"><span class="td desert-d"></span>Desert Heat</button>
+          <button class="tm-opt" onclick="setTheme('forest')"><span class="td forest-d"></span>Deep Forest</button>
+          <button class="tm-opt" onclick="setTheme('ocean')"><span class="td ocean-d"></span>Ocean Depths</button>
+        </div>
+      </div>
+      <div class="live-clock">
+        <div id="clockTime" class="clock-time">--:--</div>
+        <div id="clockDate" class="clock-date">Loading...</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SEARCH -->
+  <section class="search-section">
+    <div class="search-wrap">
+      <span class="search-sym">⌖</span>
+      <input type="text" id="cityInput" placeholder="Search any city in the world..." autocomplete="off"/>
+      <button class="search-btn" onclick="loadWeather()">SEARCH</button>
+    </div>
+    <div class="quick-row">
+      <span class="ql">Quick:</span>
+      <button class="qbtn" onclick="quickLoad('Mumbai')">Mumbai</button>
+      <button class="qbtn" onclick="quickLoad('London')">London</button>
+      <button class="qbtn" onclick="quickLoad('Tokyo')">Tokyo</button>
+      <button class="qbtn" onclick="quickLoad('New York')">New York</button>
+      <button class="qbtn" onclick="quickLoad('Dubai')">Dubai</button>
+      <button class="qbtn" onclick="quickLoad('Sydney')">Sydney</button>
+    </div>
+  </section>
+
+  <!-- LOADER -->
+  <div id="loader" class="loader hidden">
+    <div class="loader-orb"></div>
+    <p>Scanning the atmosphere<span class="dots">...</span></p>
   </div>
 
-  <!-- Main app wrapper -->
-  <div class="app">
-
-    <!-- Header -->
-    <header class="header">
-      <div class="logo">SKY<span>CAST</span></div>
-      <div class="tagline">Real-time Weather Intelligence</div>
-    </header>
-
-    <!-- Search Section -->
-    <div class="search-section">
-      <div class="search-wrapper">
-        <span class="search-icon">⌖</span>
-        <input 
-          type="text" 
-          id="cityInput" 
-          placeholder="Enter city name..." 
-          autocomplete="off"
-        />
-        <button id="searchBtn" onclick="getWeather()">
-          <span>SEARCH</span>
-          <div class="btn-bg"></div>
-        </button>
-      </div>
-
-      <!-- Quick city buttons -->
-      <div class="quick-cities">
-        <span class="quick-label">Quick:</span>
-        <button class="city-pill" onclick="quickSearch('Mumbai')">Mumbai</button>
-        <button class="city-pill" onclick="quickSearch('London')">London</button>
-        <button class="city-pill" onclick="quickSearch('New York')">New York</button>
-        <button class="city-pill" onclick="quickSearch('Tokyo')">Tokyo</button>
-      </div>
-    </div>
-
-    <!-- Loading -->
-    <div id="loader" class="loader hidden">
-      <div class="loader-ring"></div>
-      <p>Fetching atmosphere data...</p>
-    </div>
-
-    <!-- Error -->
-    <div id="errorMsg" class="error-box hidden">
-      <span class="error-icon">⚠</span>
-      <span id="errorText"></span>
-    </div>
-
-    <!-- Weather Card -->
-    <div id="weatherCard" class="weather-card hidden">
-
-      <!-- Top: City + Date -->
-      <div class="card-header">
-        <div class="city-info">
-          <h2 id="cityName"></h2>
-          <p id="countryName"></p>
-        </div>
-        <div class="date-info">
-          <p id="currentDate"></p>
-          <p id="currentTime"></p>
-        </div>
-      </div>
-
-      <!-- Middle: Temperature + Icon -->
-      <div class="card-middle">
-        <div class="temp-block">
-          <span id="tempValue"></span>
-          <div class="temp-unit-toggle">
-            <span id="unit">°C</span>
-          </div>
-        </div>
-        <div class="weather-visual">
-          <img id="weatherIcon" src="" alt="Weather" />
-          <p id="description"></p>
-        </div>
-      </div>
-
-      <!-- Divider -->
-      <div class="divider">
-        <span>ATMOSPHERE DETAILS</span>
-      </div>
-
-      <!-- Stats Grid -->
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div class="stat-icon">💧</div>
-          <div class="stat-value" id="humidity"></div>
-          <div class="stat-label">Humidity</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-icon">💨</div>
-          <div class="stat-value" id="wind"></div>
-          <div class="stat-label">Wind Speed</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-icon">🌡️</div>
-          <div class="stat-value" id="feelsLike"></div>
-          <div class="stat-label">Feels Like</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-icon">👁️</div>
-          <div class="stat-value" id="visibility"></div>
-          <div class="stat-label">Visibility</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-icon">🔼</div>
-          <div class="stat-value" id="pressure"></div>
-          <div class="stat-label">Pressure</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-icon">☁️</div>
-          <div class="stat-value" id="clouds"></div>
-          <div class="stat-label">Cloud Cover</div>
-        </div>
-      </div>
-
-      <!-- Sun Times -->
-      <div class="sun-bar">
-        <div class="sun-item">
-          <span class="sun-icon">🌅</span>
-          <div>
-            <p class="sun-label">SUNRISE</p>
-            <p class="sun-time" id="sunrise"></p>
-          </div>
-        </div>
-        <div class="sun-track">
-          <div class="sun-progress" id="sunProgress"></div>
-          <div class="sun-dot" id="sunDot"></div>
-        </div>
-        <div class="sun-item">
-          <span class="sun-icon">🌇</span>
-          <div>
-            <p class="sun-label">SUNSET</p>
-            <p class="sun-time" id="sunset"></p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Weather Mood Banner -->
-      <div class="mood-banner" id="moodBanner">
-        <span id="moodText"></span>
-      </div>
-
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-      Powered by OpenWeatherMap API &nbsp;|&nbsp; Built with DevOps Pipeline
-    </footer>
-
+  <!-- ERROR -->
+  <div id="errorBox" class="error-box hidden">
+    <span>⚠</span> <span id="errorText"></span>
   </div>
 
-  <script src="script.js"></script>
+  <!-- MAIN CONTENT -->
+  <div id="mainContent" class="main-content hidden">
+
+    <!-- HERO CARD -->
+    <div class="hero-card">
+      <div class="hero-left">
+        <div class="city-badge">
+          <span>📍</span>
+          <div>
+            <h1 id="heroCity"></h1>
+            <p id="heroCountry"></p>
+          </div>
+        </div>
+        <div class="hero-temp-wrap">
+          <span id="heroTemp" class="hero-temp"></span>
+          <sup class="hero-unit">°C</sup>
+        </div>
+        <p id="heroDesc" class="hero-desc"></p>
+        <div class="hero-feels">
+          <span>Feels like</span>
+          <strong id="heroFeels"></strong>
+        </div>
+        <div class="min-max-row">
+          <span>↓ <span id="tempMin"></span></span>
+          <span class="mm-sep">|</span>
+          <span>↑ <span id="tempMax"></span></span>
+        </div>
+      </div>
+      <div class="hero-right">
+        <img id="heroIcon" src="" alt="Weather"/>
+        <div class="time-phase" id="timePhase"></div>
+        <div class="local-time">
+          <div class="lt-label">LOCAL TIME</div>
+          <div id="localTime" class="lt-value">--:--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-top"><span class="stat-ic">💧</span><span class="stat-label">Humidity</span></div>
+        <div class="stat-val" id="statHumidity">--</div>
+        <div class="stat-bar-wrap"><div class="stat-bar" id="humidityBar"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><span class="stat-ic">💨</span><span class="stat-label">Wind</span></div>
+        <div class="stat-val" id="statWind">--</div>
+        <div class="compass-ring">
+          <div class="compass-needle" id="compassNeedle">↑</div>
+          <span class="compass-dir" id="compassDir">N</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><span class="stat-ic">👁️</span><span class="stat-label">Visibility</span></div>
+        <div class="stat-val" id="statVisibility">--</div>
+        <div class="stat-bar-wrap"><div class="stat-bar vis-bar" id="visibilityBar"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><span class="stat-ic">🔼</span><span class="stat-label">Pressure</span></div>
+        <div class="stat-val" id="statPressure">--</div>
+        <div class="stat-sub" id="pressureTrend">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><span class="stat-ic">☁️</span><span class="stat-label">Clouds</span></div>
+        <div class="stat-val" id="statClouds">--</div>
+        <div class="cloud-dots" id="cloudDots"></div>
+      </div>
+    </div>
+
+    <!-- SUN TRACK -->
+    <div class="sun-track-card">
+      <div class="sun-ep">
+        <span class="sun-emoji">🌅</span>
+        <div>
+          <div class="sun-lbl">SUNRISE</div>
+          <div class="sun-t" id="sunriseTime">--:--</div>
+        </div>
+      </div>
+      <div class="sun-arc-wrap">
+        <svg class="sun-arc-svg" viewBox="0 0 320 90" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:0.4"/>
+              <stop offset="50%" style="stop-color:#ffcc00;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#ff6b35;stop-opacity:0.4"/>
+            </linearGradient>
+            <filter id="sunGlow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path d="M 15 82 Q 160 -15 305 82" stroke="url(#arcGrad)" stroke-width="2.5" fill="none" stroke-dasharray="5 4" opacity="0.7"/>
+          <line x1="15" y1="82" x2="305" y2="82" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <circle id="sunDot" cx="15" cy="82" r="9" fill="#ffcc00" filter="url(#sunGlow)"/>
+        </svg>
+        <div class="day-pct" id="dayPct">-- % of daylight passed</div>
+      </div>
+      <div class="sun-ep">
+        <span class="sun-emoji">🌇</span>
+        <div>
+          <div class="sun-lbl">SUNSET</div>
+          <div class="sun-t" id="sunsetTime">--:--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTFIT ADVISOR -->
+    <div class="outfit-card" id="outfitCard">
+      <div class="outfit-icon" id="outfitIcon">👔</div>
+      <div class="outfit-info">
+        <div class="outfit-title">OUTFIT ADVISOR</div>
+        <div class="outfit-text" id="outfitText">Loading...</div>
+      </div>
+      <div class="outfit-badge" id="outfitBadge">READY</div>
+    </div>
+
+    <!-- HOURLY FORECAST + CHART -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">◈ 24-HOUR FORECAST</div>
+        <div class="chart-toggle">
+          <button class="ctbtn active" id="btnTemp" onclick="switchChart('temp')">TEMP</button>
+          <button class="ctbtn" id="btnHumid" onclick="switchChart('humid')">HUMIDITY</button>
+          <button class="ctbtn" id="btnWind" onclick="switchChart('wind')">WIND</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="hourlyChart"></canvas>
+      </div>
+      <div class="hourly-scroll" id="hourlyScroll"></div>
+    </div>
+
+    <!-- 7-DAY FORECAST -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">◈ 7-DAY FORECAST</div>
+        <div class="week-note">Based on 3-hour intervals</div>
+      </div>
+      <div class="week-grid" id="weekGrid"></div>
+    </div>
+
+    <!-- WEATHER STORY -->
+    <div class="story-card" id="storyCard">
+      <div class="story-icon" id="storyIcon">🌍</div>
+      <div class="story-text" id="storyText"></div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-row">
+      <div class="moon-card">
+        <div class="moon-title">◈ MOON PHASE</div>
+        <div class="moon-visual" id="moonVisual">🌕</div>
+        <div class="moon-name" id="moonName">Full Moon</div>
+        <div class="moon-detail" id="moonDetail">Illumination: 100%</div>
+      </div>
+      <div class="fact-card">
+        <div class="fact-title">◈ DID YOU KNOW?</div>
+        <div class="fact-text" id="factText">Loading...</div>
+        <button class="fact-btn" onclick="nextFact()">Next Fact →</button>
+      </div>
+    </div>
+
+  </div><!-- /mainContent -->
+
+  <footer class="footer">Powered by OpenWeatherMap API &nbsp;|&nbsp; Built with DevOps CI/CD Pipeline &nbsp;|&nbsp; SKYCAST © 2025</footer>
+
+</div><!-- /app -->
+
+<script src="script.js"></script>
 </body>
 </html>
