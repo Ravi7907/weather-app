@@ -3,39 +3,169 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Weather Forecast App</title>
+  <title>SKYCAST — Weather Intelligence</title>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
-  <div class="container">
-    <h1>🌤️ Weather Forecast</h1>
-    <p class="subtitle">Enter any city to get live weather</p>
+  <!-- Animated background particles -->
+  <div class="bg-layer">
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+    <div class="particle p4"></div>
+    <div class="particle p5"></div>
+  </div>
 
-    <div class="search-box">
-      <input 
-        type="text" 
-        id="cityInput" 
-        placeholder="e.g. Mumbai, London, New York" 
-      />
-      <button onclick="getWeather()">Search</button>
-    </div>
+  <!-- Main app wrapper -->
+  <div class="app">
 
-    <!-- This area shows weather info -->
-    <div id="weatherCard" class="weather-card hidden">
-      <h2 id="cityName"></h2>
-      <img id="weatherIcon" src="" alt="Weather Icon" />
-      <p class="big-temp" id="temp"></p>
-      <p id="description"></p>
-      <div class="details">
-        <span id="humidity"></span>
-        <span id="wind"></span>
-        <span id="feelsLike"></span>
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">SKY<span>CAST</span></div>
+      <div class="tagline">Real-time Weather Intelligence</div>
+    </header>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-wrapper">
+        <span class="search-icon">⌖</span>
+        <input 
+          type="text" 
+          id="cityInput" 
+          placeholder="Enter city name..." 
+          autocomplete="off"
+        />
+        <button id="searchBtn" onclick="getWeather()">
+          <span>SEARCH</span>
+          <div class="btn-bg"></div>
+        </button>
+      </div>
+
+      <!-- Quick city buttons -->
+      <div class="quick-cities">
+        <span class="quick-label">Quick:</span>
+        <button class="city-pill" onclick="quickSearch('Mumbai')">Mumbai</button>
+        <button class="city-pill" onclick="quickSearch('London')">London</button>
+        <button class="city-pill" onclick="quickSearch('New York')">New York</button>
+        <button class="city-pill" onclick="quickSearch('Tokyo')">Tokyo</button>
       </div>
     </div>
 
-    <!-- This shows if there's an error -->
-    <div id="errorMsg" class="error hidden"></div>
+    <!-- Loading -->
+    <div id="loader" class="loader hidden">
+      <div class="loader-ring"></div>
+      <p>Fetching atmosphere data...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="errorMsg" class="error-box hidden">
+      <span class="error-icon">⚠</span>
+      <span id="errorText"></span>
+    </div>
+
+    <!-- Weather Card -->
+    <div id="weatherCard" class="weather-card hidden">
+
+      <!-- Top: City + Date -->
+      <div class="card-header">
+        <div class="city-info">
+          <h2 id="cityName"></h2>
+          <p id="countryName"></p>
+        </div>
+        <div class="date-info">
+          <p id="currentDate"></p>
+          <p id="currentTime"></p>
+        </div>
+      </div>
+
+      <!-- Middle: Temperature + Icon -->
+      <div class="card-middle">
+        <div class="temp-block">
+          <span id="tempValue"></span>
+          <div class="temp-unit-toggle">
+            <span id="unit">°C</span>
+          </div>
+        </div>
+        <div class="weather-visual">
+          <img id="weatherIcon" src="" alt="Weather" />
+          <p id="description"></p>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>ATMOSPHERE DETAILS</span>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-icon">💧</div>
+          <div class="stat-value" id="humidity"></div>
+          <div class="stat-label">Humidity</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">💨</div>
+          <div class="stat-value" id="wind"></div>
+          <div class="stat-label">Wind Speed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">🌡️</div>
+          <div class="stat-value" id="feelsLike"></div>
+          <div class="stat-label">Feels Like</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">👁️</div>
+          <div class="stat-value" id="visibility"></div>
+          <div class="stat-label">Visibility</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">🔼</div>
+          <div class="stat-value" id="pressure"></div>
+          <div class="stat-label">Pressure</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">☁️</div>
+          <div class="stat-value" id="clouds"></div>
+          <div class="stat-label">Cloud Cover</div>
+        </div>
+      </div>
+
+      <!-- Sun Times -->
+      <div class="sun-bar">
+        <div class="sun-item">
+          <span class="sun-icon">🌅</span>
+          <div>
+            <p class="sun-label">SUNRISE</p>
+            <p class="sun-time" id="sunrise"></p>
+          </div>
+        </div>
+        <div class="sun-track">
+          <div class="sun-progress" id="sunProgress"></div>
+          <div class="sun-dot" id="sunDot"></div>
+        </div>
+        <div class="sun-item">
+          <span class="sun-icon">🌇</span>
+          <div>
+            <p class="sun-label">SUNSET</p>
+            <p class="sun-time" id="sunset"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather Mood Banner -->
+      <div class="mood-banner" id="moodBanner">
+        <span id="moodText"></span>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      Powered by OpenWeatherMap API &nbsp;|&nbsp; Built with DevOps Pipeline
+    </footer>
 
   </div>
 
