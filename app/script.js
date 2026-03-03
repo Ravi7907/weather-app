@@ -797,3 +797,7 @@ window.addEventListener('appinstalled', () => {
   console.log('✅ SKYCAST installed successfully!');
   dismissBanner();
 });
+
+// Auto update footer year
+document.querySelector('.footer').innerHTML = 
+  `Powered by OpenWeatherMap API &nbsp;|&nbsp; Built with DevOps CI/CD Pipeline &nbsp;|&nbsp; SKYCAST © ${new Date().getFullYear()}`;
