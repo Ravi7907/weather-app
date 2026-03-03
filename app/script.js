@@ -727,3 +727,73 @@ function fallbackToDefault() {
   // Just show empty search — don't force Mumbai
   document.getElementById('loader').classList.add('hidden');
 }
+
+// ═══════════════════════════════════
+//  PWA — Register Service Worker
+// ═══════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => {
+        console.log('✅ SKYCAST PWA ready! Scope:', reg.scope);
+      })
+      .catch(err => {
+        console.log('❌ SW registration failed:', err);
+      });
+  });
+}
+
+// ── Install Prompt for Android ──────
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  // Create install banner if it doesn't exist
+  if (document.getElementById('installBanner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'installBanner';
+  banner.innerHTML = `
+    <div class="install-content">
+      <span class="install-icon">📲</span>
+      <div class="install-text">
+        <strong>Install SKYCAST</strong>
+        <span>Add to your home screen</span>
+      </div>
+      <button class="install-yes" onclick="installApp()">INSTALL</button>
+      <button class="install-no" onclick="dismissBanner()">✕</button>
+    </div>
+  `;
+  document.body.appendChild(banner);
+
+  // Auto dismiss after 10 seconds
+  setTimeout(() => dismissBanner(), 10000);
+}
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log('Install outcome:', outcome);
+  deferredPrompt = null;
+  dismissBanner();
+}
+
+function dismissBanner() {
+  const banner = document.getElementById('installBanner');
+  if (banner) {
+    banner.style.animation = 'slideDown 0.3s ease forwards';
+    setTimeout(() => banner.remove(), 300);
+  }
+}
+
+// ── Detect if already installed ─────
+window.addEventListener('appinstalled', () => {
+  console.log('✅ SKYCAST installed successfully!');
+  dismissBanner();
+});

@@ -1227,3 +1227,93 @@ body {
   .stats-row { gap: 14px; }
   .week-grid { gap: 12px; }
 }
+
+/* ═══════════════════════════
+   PWA INSTALL BANNER
+   ═══════════════════════════ */
+#installBanner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--accent);
+  padding: 16px 20px;
+  z-index: 9999;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(100%); opacity: 0; }
+}
+
+.install-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.install-icon { font-size: 1.8rem; flex-shrink: 0; }
+
+.install-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.install-text strong {
+  font-size: 0.95rem;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+
+.install-text span {
+  font-size: 0.75rem;
+  color: var(--text2);
+}
+
+.install-yes {
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  padding: 10px 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.install-yes:active { transform: scale(0.96); }
+
+.install-no {
+  background: none;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  color: var(--text2);
+  font-size: 0.85rem;
+  padding: 10px 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.install-no:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 480px) {
+  #installBanner { padding: 12px 14px; }
+  .install-text strong { font-size: 0.85rem; }
+  .install-yes { padding: 9px 14px; font-size: 0.82rem; }
+}
