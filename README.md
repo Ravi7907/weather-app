@@ -1,5 +1,6 @@
 # 🌤️ SKYCAST — Weather Intelligence App
 
+
 > A full-stack weather forecast web application built with a complete DevOps CI/CD pipeline.
 
 ![Node.js](https://img.shields.io/badge/Node.js-18.x-green?style=flat-square&logo=node.js)
